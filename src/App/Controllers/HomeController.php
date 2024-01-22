@@ -24,7 +24,7 @@ class HomeController
     {
         # to pass the view template to  render method in TemplateEngine to include the view
         echo $this->view->render("/index.php", [
-            'title' => "Home page"
+            'title' => "Image Crafters"
         ]);
     }
 }
