@@ -9,10 +9,23 @@ class App
     # declaring router class
     private Router $router;
 
+    #declaring container class
+    private Container $container;
+
     # contractor of the class
-    public function __construct()
+    public function __construct(string $containerDefinitionsPath = null)
     {
         $this->router = new Router();
+        $this->container = new Container();
+
+        # check if container definition path have a value before it is passed to Container->addDefinitions Method
+        if ($containerDefinitionsPath) {
+            # grabing the array of the container
+            $containerDefinitions = include $containerDefinitionsPath;
+
+            # adding new container definition
+            $this->container->addDefinitions($containerDefinitions);
+        }
     }
 
     # running method 
@@ -25,7 +38,7 @@ class App
         $method = $_SERVER['REQUEST_METHOD'];
 
         # call dispatch method from the Router class
-        $this->router->despatch($path, $method);
+        $this->router->despatch($path, $method, $this->container);
     }
 
     # add a path with a GET method

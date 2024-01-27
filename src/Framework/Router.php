@@ -41,7 +41,7 @@ class Router
     }
 
     # to send data to the view / to dispatch content to be displayed
-    public function despatch(string $path, string $method)
+    public function despatch(string $path, string $method, Container $container = null)
     {
         # format the path
         $path = $this->normalizePath($path);
@@ -66,7 +66,8 @@ class Router
             [$class, $function] = $route['controller'];
 
             # class instance of the class
-            $controllerInstance = new $class;
+            $controllerInstance = $container ?
+                $container->resolve($class) : new $class;
 
             # envoke the method passed into the route
             $controllerInstance->{$function}();
