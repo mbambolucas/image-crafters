@@ -11,6 +11,9 @@ class Router
     # empty array for routes
     private array $routes = [];
 
+    # store middleware in an arrray
+    private array $middlewares = [];
+
     # method received path, method, and controller array (controller class name and method) from  Framework/App
     public function add(string $path, string $method, array $controller)
     {
@@ -70,7 +73,31 @@ class Router
                 $container->resolve($class) : new $class;
 
             # envoke the method passed into the route
-            $controllerInstance->{$function}();
+            $action = fn () => $controllerInstance->{$function}();
+
+            # looping through the middleware array
+            foreach ($this->middlewares as $middleware) {
+                # instatiate the middleware
+                # checking the existance of the container
+                $middlewareInstance = $container ? $container->resolve($middleware) : new $middleware;
+
+                # override the action with the middleware.
+                $action = fn () => $middlewareInstance->process($action);
+            }
+
+            # Envoking the action functions
+            $action();
+
+            return;
         }
+    }
+
+    # method to add new middleware,
+    # it requires dependancy 
+    # it passes the class name
+    public function addMiddleware(string $middleware)
+    {
+        # add the parameter to middleware array
+        $this->middlewares[] = $middleware;
     }
 }

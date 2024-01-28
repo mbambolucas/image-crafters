@@ -14,6 +14,8 @@ class Container
     #creating empty definition array
     private array $definitions = [];
 
+    private array $resolved = [];
+
     #add new definitions to the array
     public function addDefinitions(array $newDefinitions)
     {
@@ -71,8 +73,37 @@ class Container
             if (!$type instanceof ReflectionNamedType || $type->isBuiltin()) {
                 throw new ContainerException("Failed to resolve class {$className} because invalid param name");
             }
+
+            #
+            $dependancies[] = $this->get($type->getName());
         }
 
-        dd($params);
+        # Creates a new class instance from given arguments
+        return $reflectionClass->newInstanceArgs($dependancies);
+    }
+
+    # return a instance of the dependance
+    public function get(string $id)
+    {
+        #validate the id if there is a parameter with the id
+        if (!array_key_exists($id, $this->definitions)) {
+            throw new ContainerException("Class {$id} does not exist in container.");
+        }
+
+        # retricting our class to a single instance
+        if (array_key_exists($id, $this->resolved)) {
+            return $this->resolved[$id];
+        }
+
+        # factory functions
+        $factory = $this->definitions[$id];
+
+        # return value of the function
+        $dependancy = $factory();
+
+        # add depandancies to resolved array
+        $this->resolved[$id] = $dependancy;
+
+        return $dependancy;
     }
 }

@@ -6,6 +6,8 @@ namespace Framework;
 
 class TemplateEngine
 {
+    private array $globalTemplateData = [];
+
     public function __construct(private string $basePath)
     {
     }
@@ -16,6 +18,8 @@ class TemplateEngine
         # extract values into individual variable base on their key names
         # Import variables from an array into the current symbol table
         extract($data, EXTR_SKIP);
+
+        extract($this->globalTemplateData, EXTR_SKIP);
 
         # start the bufferring / creating a buffer / store content in an output buffer
         ob_start();
@@ -35,5 +39,12 @@ class TemplateEngine
     public function resolve(string $path)
     {
         return "{$this->basePath}/{$path}";
+    }
+
+    # add new data to the array 
+    public function addGlobal(string $key, mixed $value)
+    {
+        # add data to the array
+        $this->globalTemplateData[$key] = $value;
     }
 }
